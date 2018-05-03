@@ -26,26 +26,14 @@ def step(request, survey_id, attempt_id, surveypage_nr):
     page = pages.filter(page_nr=surveypage_nr).first();
     questions = page.question_set.all()
 
-    rageHard = request.POST
+    form = SurveyForm(request.POST or None, questions=questions)
 
-    if request.method == 'POST':
-        form = SurveyForm(request.POST)
-    else:
-        form = SurveyForm(questions=questions)
-
-    print("it should be") 
-    if request.method == 'POST':
-        if form.is_valid():
-            print("defo valid")
-            attempt.score = 200
-            qs = form.cleaned_data[fields]
-            for field in qs:
-                answer = get_object_or_404(field)
-                attempt.score = attempt.score + 7 + answer.score
-        attempt.score = attempt.score + 5
+    if form.is_valid():
+        for a in form.answers():
+            answer = get_object_or_404(a)
+            attempt.score = attempt.score + 7 + answer.score
         attempt.save()
-        print("HUEHUEHUEHEUHEUHEUHEUHEUHEUHUE")
-        return HttpResponseRedirect(reverse('cucumber:results', args=(survey.id, attempt.id,)))
+        return HttpResponseRedirect(reverse('denzel:results', args=(survey.id, attempt.id,)))
     
     else:        
         context = {'page': page, 'form': form}
