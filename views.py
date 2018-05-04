@@ -29,10 +29,6 @@ def step(request, survey_id, attempt_id, surveypage_nr):
     form = SurveyForm(request.POST or None, questions=questions)
 
     if form.is_valid():
-        print("\n\n\n\nclean data: " + str(form.cleaned_data))
-        print("\nform data: " + str(form.data))
-        print("\npost request: " + str(request.POST) + "\n\n\n")
-
         for a in form.answers():
             answer = get_object_or_404(Choice, pk=a)
             attempt.score = attempt.score + answer.score

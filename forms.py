@@ -12,7 +12,7 @@ class SurveyForm(forms.Form):
             for answer in q.choice_set.all():
                     choices.append((answer.pk, answer.choice_text))
 
-            self.fields[q.id] = forms.ChoiceField(label=q.question_text, required=False, 
+            self.fields[str(q.id)] = forms.ChoiceField(label=q.question_text, required=False, 
                                       choices=choices, widget=forms.RadioSelect)
 
     def answers(self):
