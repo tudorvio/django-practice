@@ -1,7 +1,11 @@
-<h1>Survey page {{ page.page_nr }} </h1>
+<h1>Survey page {{ page.page_nr }} of {{ totalp }}</h1>
 
 <form method='post'>
     {% csrf_token %}
     {{ form.as_p }}
-    <input type='submit' value='submit'>
+    {% if next == 0 %}
+        <input type='submit' value='Submit'>
+    {% else %}
+        <input type='submit' value='Next'>
+    {% endif %}
 </form>

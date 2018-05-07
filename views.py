@@ -12,10 +12,9 @@ def index(request):
 
 def survey(request, survey_id):
     survey = get_object_or_404(Survey, pk=survey_id)
-    pages = survey.surveypage_set.all().order_by('page_nr')
     attempt = Attempt.create(survey=survey)
     attempt.save()
-    context = {'survey': survey, 'pages': pages, 'attempt': attempt}
+    context = {'survey': survey, 'attempt': attempt}
 
     return render(request, 'survey/detail.html', context)
 
@@ -25,6 +24,13 @@ def step(request, survey_id, attempt_id, surveypage_nr):
     pages = survey.surveypage_set.all().order_by('page_nr')
     page = pages.filter(page_nr=surveypage_nr).first();
     questions = page.question_set.all()
+    totalp = len(pages)
+
+    # If it's the last page or not.
+    if surveypage_nr == len(pages):
+        next = 0
+    else:
+        next = surveypage_nr + 1
 
     form = SurveyForm(request.POST or None, questions=questions)
 
@@ -33,10 +39,12 @@ def step(request, survey_id, attempt_id, surveypage_nr):
             answer = get_object_or_404(Choice, pk=a)
             attempt.score = attempt.score + answer.score
         attempt.save()
-        return HttpResponseRedirect(reverse('results', args=(survey.id, attempt.id,)))
-    
+        if next == 0:
+            return HttpResponseRedirect(reverse('results', args=(survey.id, attempt.id,)))
+        else:
+            return HttpResponseRedirect(reverse('step', args=(survey.id, attempt.id, next)))
     else:        
-        context = {'page': page, 'form': form}
+        context = {'page': page, 'form': form, 'next': next, 'totalp': totalp}
         return render(request, 'survey/surveypage.html', context)
 
 def results(request, survey_id, attempt_id):
